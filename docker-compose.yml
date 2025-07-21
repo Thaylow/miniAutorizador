@@ -1,0 +1,53 @@
+version: "3.7"
+
+services:
+
+  # mongo:
+    # image: mongo:4.2
+    # hostname: mongo
+    # container_name: mongo
+    # ports:
+      # - 27017:27017
+    # environment:
+      # MONGO_INITDB_DATABASE: miniautorizador
+      # MONGO_INITDB_ROOT_USERNAME: user
+      # MONGO_INITDB_ROOT_PASSWORD: password
+    # volumes:
+      # - ./scripts/init.js:/docker-entrypoint-initdb.d/init.js:ro
+
+  mysql:
+    image: mysql:5.7
+    hostname: mysql
+    container_name: mysql_teste
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: miniautorizador
+      MYSQL_ROOT_PASSWORD:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      
+  # ----------------------------------------
+  # Mini Autorizador Spring Boot
+  # ----------------------------------------
+  miniautorizador:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: miniautorizador-app
+    container_name: miniautorizador_app
+    ports:
+      - "8080:8080"
+    environment:
+      # MySQL variaveis para o application.properties
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/miniautorizador
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""
+      SPRING_DATASOURCE_DRIVER: com.mysql.cj.jdbc.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: true
+      SPRING_JPA_FORMAT_SQL: true
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQLDialect
+
+    depends_on:
+      - mysql
